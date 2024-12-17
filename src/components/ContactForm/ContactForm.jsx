@@ -41,7 +41,7 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
     setShowPasswordHint(false);
     if (name === '') {
       setErrors((prevErrors) => ({ ...prevErrors, name: 'required' }));
-    } else if (name.length < 2) {
+    } else if (name.length < 3) {
       setErrors((prevErrors) => ({ ...prevErrors, name: 'too-short' }));
     } else {
       setErrors((prevErrors) => ({ ...prevErrors, name: false }));
@@ -57,15 +57,15 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
     setIsNumberFocused(false);
     if (number === '') {
       setErrors((prevErrors) => ({ ...prevErrors, number: 'required' }));
-    } else if (number.length < 2) {
+    } else if (number.length < 3) {
       setErrors((prevErrors) => ({ ...prevErrors, number: 'too-short' }));
     } else {
       setErrors((prevErrors) => ({ ...prevErrors, number: false }));
     }
   };
 
-  // Если фокус на поле поиска, скрыть ошибки
-  const shouldShowErrors = !isSearchFocused;
+  
+  const shouldShowErrors = !isSearchFocused;  // Якщо фокус на полі пошуку, то приховати error у інпутах
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
@@ -113,8 +113,8 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
             onFocus={handleNumberFocus}
             onBlur={handleNumberBlur}
             required
-            minLength={2}
-            className={styles.input}
+            minLength={3}
+            className={`${styles.input} ${isNumberFocused ? styles.focused : ''}`}
           />
           {shouldShowErrors && errors.number === 'required' && (
             <div className={styles.error}>Required</div>
@@ -131,7 +131,7 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
 
 ContactForm.propTypes = {
   addContact: PropTypes.func.isRequired,
-  isSearchFocused: PropTypes.bool.isRequired,  // Добавили проп для отслеживания фокуса на SearchBox
+  isSearchFocused: PropTypes.bool.isRequired, // Додаємо проп для відслідковування фокуса на SearchBox
 };
 
 export default ContactForm;
