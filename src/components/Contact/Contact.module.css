@@ -1,0 +1,48 @@
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.contactDetail {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.name,
+.number {
+  margin: 0;
+}
+
+.deleteButton {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #dc3545;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.deleteButton:hover {
+  background-color: #ab0f1f;
+}
+
+.deleteIcon {
+  margin-left: 5px; /* Расстояние между текстом "Delete" и иконкой */
+}
