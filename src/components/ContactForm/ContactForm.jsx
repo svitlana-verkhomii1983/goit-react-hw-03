@@ -1,85 +1,62 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 /* eslint-enable no-unused-vars */
-import { nanoid } from 'nanoid';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import PropTypes from 'prop-types';
-import styles from './ContactForm.module.css';
+import { nanoid } from 'nanoid';
 import { FiLock } from 'react-icons/fi';
+import styles from './ContactForm.module.css';
 
 const ContactForm = ({ addContact, isSearchFocused }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-  const [showPasswordHint, setShowPasswordHint] = useState(false);
   const [isNameFocused, setIsNameFocused] = useState(false);
-  const [isNumberFocused, setIsNumberFocused] = useState(false);
-  const [errors, setErrors] = useState({
-    name: false,
-    number: false,
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      number: '',
+    },
+    validationSchema: Yup.object({
+      name: Yup.string()
+        .min(2, 'Too Short')
+        .required('Required'),
+      number: Yup.string()
+        .min(2, 'Too Short')
+        .required('Required'),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      const newContact = { id: nanoid(), name: values.name, number: values.number };
+      addContact(newContact);
+      resetForm();
+      setIsNameFocused(false);
+    },
   });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'name') setName(value);
-    if (name === 'number') setNumber(value);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newContact = { id: nanoid(), name, number };
-    addContact(newContact);
-    setName('');
-    setNumber('');
-  };
 
   const handleNameFocus = () => {
     setIsNameFocused(true);
-    setShowPasswordHint(true);
   };
 
   const handleNameBlur = () => {
     setIsNameFocused(false);
-    setShowPasswordHint(false);
-    if (name === '') {
-      setErrors((prevErrors) => ({ ...prevErrors, name: 'required' }));
-    } else if (name.length < 3) {
-      setErrors((prevErrors) => ({ ...prevErrors, name: 'too-short' }));
-    } else {
-      setErrors((prevErrors) => ({ ...prevErrors, name: false }));
-    }
   };
 
-  const handleNumberFocus = () => {
-    setIsNumberFocused(true);
-    setErrors((prevErrors) => ({ ...prevErrors, number: false }));
-  };
-
-  const handleNumberBlur = () => {
-    setIsNumberFocused(false);
-    if (number === '') {
-      setErrors((prevErrors) => ({ ...prevErrors, number: 'required' }));
-    } else if (number.length < 3) {
-      setErrors((prevErrors) => ({ ...prevErrors, number: 'too-short' }));
-    } else {
-      setErrors((prevErrors) => ({ ...prevErrors, number: false }));
-    }
-  };
-
-  
-  const shouldShowErrors = !isSearchFocused;  // Якщо фокус на полі пошуку, то приховати error у інпутах
+  const shouldShowErrors = !isSearchFocused;
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={formik.handleSubmit}>
       <label className={styles.label}>
         Name
         <div className={styles.inputContainer}>
           <input
             type="text"
             name="name"
-            value={name}
-            onChange={handleChange}
+            onChange={formik.handleChange}
+            onBlur={(e) => {
+              formik.handleBlur(e);
+              handleNameBlur();
+            }}
             onFocus={handleNameFocus}
-            onBlur={handleNameBlur}
-            required
+            value={formik.values.name}
             className={styles.input}
           />
           {isNameFocused && (
@@ -91,15 +68,12 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
               </div>
             </div>
           )}
-          {showPasswordHint && !name && (
+          {isNameFocused && !formik.values.name && (
             <div className={styles.hint}>Use 1 Password</div>
           )}
-          {shouldShowErrors && errors.name === 'required' && (
-            <div className={styles.error}>Required</div>
-          )}
-          {shouldShowErrors && errors.name === 'too-short' && (
-            <div className={styles.error}>Too Short</div>
-          )}
+          {formik.touched.name && shouldShowErrors && formik.errors.name ? (
+            <div className={styles.error}>{formik.errors.name}</div>
+          ) : null}
         </div>
       </label>
       <label className={styles.label}>
@@ -108,20 +82,15 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
           <input
             type="text"
             name="number"
-            value={number}
-            onChange={handleChange}
-            onFocus={handleNumberFocus}
-            onBlur={handleNumberBlur}
-            required
-            minLength={3}
-            className={`${styles.input} ${isNumberFocused ? styles.focused : ''}`}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            onFocus={() => setIsNameFocused(false)}
+            value={formik.values.number}
+            className={styles.input}
           />
-          {shouldShowErrors && errors.number === 'required' && (
-            <div className={styles.error}>Required</div>
-          )}
-          {shouldShowErrors && errors.number === 'too-short' && (
-            <div className={styles.error}>Too Short</div>
-          )}
+          {formik.touched.number && shouldShowErrors && formik.errors.number ? (
+            <div className={styles.error}>{formik.errors.number}</div>
+          ) : null}
         </div>
       </label>
       <button type="submit" className={styles.button}>Add contact</button>
@@ -131,7 +100,7 @@ const ContactForm = ({ addContact, isSearchFocused }) => {
 
 ContactForm.propTypes = {
   addContact: PropTypes.func.isRequired,
-  isSearchFocused: PropTypes.bool.isRequired, // Додаємо проп для відслідковування фокуса на SearchBox
+  isSearchFocused: PropTypes.bool.isRequired,
 };
 
 export default ContactForm;
